@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { audioId: string } }
+    { params }: { params: Promise<{ audioId: string }> }
 ) {
     try {
-        const { audioId } = params;
+        const { audioId } = await params;
         console.log('Audio route called with audioId:', audioId);
 
         if (!audioId) {

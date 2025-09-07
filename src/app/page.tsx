@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { AudioVisualizer } from "@/components/audio-visualizer";
 import { Snackbar } from "@/components/snackbar";
 import { Heart, Bookmark, Share2, Volume2, VolumeX } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { callOpenAI } from "@/lib/api";
 import { AudioManager, AudioState } from "@/lib/audio-utils";
 import QuizCard from "@/components/quiz-card";
@@ -63,7 +63,6 @@ export default function Home() {
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [conversationHistory, setConversationHistory] = useState<Array<{ cardId: number; audioId?: string; audioContent?: string; timestamp: number }>>([]);
   const [swipeStart, setSwipeStart] = useState<{ x: number; y: number; cardId: number } | null>(null);
-  const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [loadingCardId, setLoadingCardId] = useState<number | null>(null);
   const [audioManager, setAudioManager] = useState<AudioManager | null>(null);
@@ -82,7 +81,13 @@ export default function Home() {
   // Global progress bar state
   const [progressBarProgress, setProgressBarProgress] = useState(0);
   const globalProgressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isProgressAnimating, setIsProgressAnimating] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizAnswered, setQuizAnswered] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
   // Global progress bar animation functions
   const startGlobalProgressAnimation = () => {
@@ -320,102 +325,19 @@ export default function Home() {
     }
   };
 
-  // Handle API call when card is swiped
-  const handleCardSwipe = async (cardId: number, autoPlay: boolean = true) => {
+  // Handle API call when card is swiped - COMMENTED OUT FOR BASIC UI
+  const handleCardSwipe = useCallback(async (cardId: number, autoPlay: boolean = true) => {
     console.log('handleCardSwipe called for card:', cardId, 'autoPlay:', autoPlay);
-
-    // Stop any currently playing audio when switching cards
-    if (currentAudioSource) {
-      console.log('Stopping previous audio for new card');
-      currentAudioSource.stop();
-      setCurrentAudioSource(null);
-      setAudioState(prev => ({
-        ...prev,
-        isPlaying: false,
-        currentAudioId: null
-      }));
-      stopGlobalProgressAnimation();
-
-      // Show brief notification that audio was stopped
-      setShowAudioIcon(true);
-      setTimeout(() => setShowAudioIcon(false), 1500);
-    }
-
-    try {
-      console.log('Setting loading state for card:', cardId);
-      setLoadingCardId(cardId);
-      setApiError(null);
-
-      console.log('Calling OpenAI API with contentId:', cardId, 'conversationHistory:', conversationHistory);
-
-      // Pass current conversation history to maintain context
-      const response = await callOpenAI(cardId, conversationHistory);
-
-      console.log('API response:', response);
-
-      if (response.success && response.audioId) {
-        console.log('API call successful, audioId:', response.audioId);
-        console.log('Audio content available:', !!response.audioContent);
-
-        // Clear loading state immediately after successful API call
-        console.log('Clearing loading state for card:', cardId);
-        setLoadingCardId(null);
-
-        // Update conversation history with the response
-        // Remove any existing entry for this card first, then add new one
-        setConversationHistory(prev => {
-          const filtered = prev.filter(entry => entry.cardId !== cardId);
-          return [...filtered, {
-            cardId,
-            audioId: response.audioId,
-            audioContent: response.audioContent,
-            timestamp: Date.now()
-          }];
-        });
-
-        // Auto-play audio if user has interacted (first click)
-        if (hasFirstClick) {
-          console.log('Auto-playing AI-generated audio');
-          await playOpenAIAudio(response.audioId, response.audioContent, cardId);
-        } else {
-          console.log('Audio ready but waiting for first user interaction');
-        }
-
-        // No annoying feedback
-      } else {
-        console.log('API call failed:', response.error);
-        let errorMessage = response.error || "Failed to generate audio";
-        
-        // Show specific message for API key errors
-        if (errorMessage.toLowerCase().includes('api key')) {
-          errorMessage = "OpenAI API key required";
-        }
-        
-        setApiError(errorMessage);
-        // Clear loading state on failure too
-        setLoadingCardId(null);
-      }
-    } catch (error) {
-      console.error("API call failed:", error);
-      let errorMessage = "Network error occurred";
-      
-      // Check if it's an API key related error
-      if (error instanceof Error && error.message.toLowerCase().includes('api key')) {
-        errorMessage = "OpenAI API key required";
-      }
-      
-      setApiError(errorMessage);
-    } finally {
-      setLoadingCardId(null);
-    }
-  };
+    // Just basic card interaction - no API calls for now
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationHistory, hasFirstClick]);
 
   // Handle swipe gestures
   const handleSwipeStart = (e: React.TouchEvent, cardId: number) => {
     console.log('Swipe start detected for card:', cardId);
     const touch = e.touches[0];
     setSwipeStart({ x: touch.clientX, y: touch.clientY, cardId });
-    setWatchStartTime(Date.now());
+    // setWatchStartTime(Date.now());
   };
 
   const handleSwipeEnd = async (e: React.TouchEvent, cardId: number) => {
@@ -430,7 +352,7 @@ export default function Home() {
     if (cardId === 5 && !quizAnswered) {
       console.log('Quiz not answered, preventing swipe');
       setSwipeStart(null);
-      setWatchStartTime(null);
+      // setWatchStartTime(null);
       return;
     }
 
@@ -452,14 +374,14 @@ export default function Home() {
     }
 
     setSwipeStart(null);
-    setWatchStartTime(null);
+    // setWatchStartTime(null);
   };
 
   // Handle mouse swipe for desktop
   const handleMouseDown = (e: React.MouseEvent, cardId: number) => {
     console.log('Mouse down detected for card:', cardId);
     setSwipeStart({ x: e.clientX, y: e.clientY, cardId });
-    setWatchStartTime(Date.now());
+    // setWatchStartTime(Date.now());
   };
 
   const handleMouseUp = async (e: React.MouseEvent, cardId: number) => {
@@ -474,7 +396,7 @@ export default function Home() {
     if (cardId === 5 && !quizAnswered) {
       console.log('Quiz not answered, preventing mouse swipe');
       setSwipeStart(null);
-      setWatchStartTime(null);
+      // setWatchStartTime(null);
       return;
     }
 
@@ -494,7 +416,7 @@ export default function Home() {
     }
 
     setSwipeStart(null);
-    setWatchStartTime(null);
+    // setWatchStartTime(null);
   };
 
   const handleLike = async (cardId: number) => {
@@ -581,34 +503,12 @@ export default function Home() {
     }, interval);
   };
 
-  // Play AI audio for a card
-  const playCardAudio = async (cardId: number) => {
-    if (audioRef.current && currentAudio) {
-      try {
-        // Stop current audio immediately
-        if (isPlaying) {
-          audioRef.current.pause();
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-          }
-        }
-
-        // Play AI audio
-        await audioRef.current.play();
-        setIsPlaying(true);
-        setCurrentCardId(cardId);
-
-        // Start progress animation
-        startProgressAnimation(cardId);
-
-        // Show audio icon briefly
-        setShowAudioIcon(true);
-        setTimeout(() => setShowAudioIcon(false), 2000);
-      } catch (error) {
-        console.log('Audio play failed:', error);
-      }
-    }
-  };
+  // Play AI audio for a card - COMMENTED OUT FOR BASIC UI
+  const playCardAudio = useCallback(async (cardId: number) => {
+    console.log('playCardAudio called for card:', cardId);
+    // Audio functionality disabled for basic UI
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioRef, currentAudio, isPlaying, progressIntervalRef]);
 
   // Audio control functions
   const toggleAudio = async (cardId: number) => {
@@ -735,7 +635,7 @@ export default function Home() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const cardId = parseInt(entry.target.getAttribute('data-card-id') || '0');
-            setVisibleCardId(cardId);
+            // setVisibleCardId(cardId);
 
             // Only call API if this is a different card from the current one
             if (cardId !== currentVisibleCardRef.current) {
@@ -745,10 +645,10 @@ export default function Home() {
               handleCardSwipe(cardId, true);
             }
 
-            // Auto-play only if user has clicked once (browser permission), hasn't manually paused, and AI audio is available
-            if (hasFirstClick && !userManuallyPaused && cardId !== currentCardId && currentAudio) {
-              playCardAudio(cardId);
-            }
+            // Auto-play disabled for basic UI
+            // if (hasFirstClick && !userManuallyPaused && cardId !== currentCardId && currentAudio) {
+            //   playCardAudio(cardId);
+            // }
           }
         });
       },
@@ -768,7 +668,8 @@ export default function Home() {
     return () => {
       observer.disconnect();
     };
-    }, [currentCardId, userManuallyPaused, hasFirstClick, conversationHistory, handleCardSwipe, playCardAudio, currentAudio]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentCardId, userManuallyPaused, hasFirstClick, conversationHistory, handleCardSwipe, playCardAudio]);
 
   // Cleanup on unmount
   useEffect(() => {

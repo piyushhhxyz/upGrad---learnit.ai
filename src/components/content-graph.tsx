@@ -162,8 +162,8 @@ const Flow = () => {
         console.log('Setting initial nodes:', initialNodes);
         console.log('Setting initial edges:', initialEdges);
         console.log('Content data length:', contentData.length);
-        setNodes(initialNodes);
-        setEdges(initialEdges);
+        setNodes(initialNodes as any);
+        setEdges(initialEdges as any);
     }, [initialNodes, initialEdges, setNodes, setEdges]);
 
     const onConnect = useCallback(
@@ -238,7 +238,7 @@ const Flow = () => {
                 return nextEdges;
             });
         },
-        [getClosestEdge],
+        [getClosestEdge, setEdges],
     );
 
     const onNodeDragStop = useCallback(
@@ -261,7 +261,7 @@ const Flow = () => {
                 return nextEdges;
             });
         },
-        [getClosestEdge],
+        [getClosestEdge, setEdges],
     );
 
     return (

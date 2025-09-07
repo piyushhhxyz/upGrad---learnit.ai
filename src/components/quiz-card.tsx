@@ -65,7 +65,7 @@ const RadioGroup = ({ children, onValueChange, value, className = '' }: {
     className?: string;
 }) => (
     <div className={`grid gap-2 ${className}`} role="radiogroup">
-        {React.Children.map(children, (child, index) =>
+        {React.Children.map(children, (child) =>
             React.cloneElement(child as React.ReactElement, {
                 onValueChange,
                 checked: value === (child as React.ReactElement).props.value,
@@ -77,14 +77,13 @@ const RadioGroup = ({ children, onValueChange, value, className = '' }: {
 
 const RadioGroupItem = ({
     value,
-    id,
     onValueChange,
     checked,
     disabled = false,
     className = ''
 }: {
     value: string;
-    id: string;
+    id?: string;
     onValueChange?: (value: string) => void;
     checked?: boolean;
     disabled?: boolean;

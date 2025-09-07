@@ -1,0 +1,31 @@
+
+> upgrad-ai@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.2 (Turbopack)
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 68ms
+ ✓ Compiled successfully in 7.4s
+   Linting and checking validity of types ...
+
+./src/app/page.tsx
+84:10  Warning: 'isProgressAnimating' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+85:10  Warning: 'quizCompleted' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+87:24  Warning: 'setCurrentAudio' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+775:8  Warning: React Hook useEffect has a missing dependency: 'currentAudio'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+
+./src/components/audio-visualizer.tsx:11:26
+Type error: Expected 1 arguments, but got 0.
+
+[0m [90m  9 |[39m [36mconst[39m [33mAudioSpeakingComponent[39m[33m:[39m [33mReact[39m[33m.[39m[33mFC[39m[33m<[39m[33mAudioVisualizerProps[39m[33m>[39m [33m=[39m ({ className [33m=[39m [32m""[39m }) [33m=>[39m {
+ [90m 10 |[39m     [36mconst[39m [animationValues[33m,[39m setAnimationValues] [33m=[39m useState([[35m0.8[39m[33m,[39m [35m1.2[39m[33m,[39m [35m0.9[39m[33m,[39m [35m0.7[39m])[33m;[39m
+[31m[1m>[22m[39m[90m 11 |[39m     [36mconst[39m animationRef [33m=[39m useRef[33m<[39m[33mnumber[39m[33m>[39m()[33m;[39m
+ [90m    |[39m                          [31m[1m^[22m[39m
+ [90m 12 |[39m     [36mconst[39m lastTimeRef [33m=[39m useRef[33m<[39m[33mnumber[39m[33m>[39m([35m0[39m)[33m;[39m
+ [90m 13 |[39m     [36mconst[39m targetValuesRef [33m=[39m useRef([[35m0.8[39m[33m,[39m [35m1.2[39m[33m,[39m [35m0.9[39m[33m,[39m [35m0.7[39m])[33m;[39m
+ [90m 14 |[39m     [36mconst[39m currentValuesRef [33m=[39m useRef([[35m0.8[39m[33m,[39m [35m1.2[39m[33m,[39m [35m0.9[39m[33m,[39m [35m0.7[39m])[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null

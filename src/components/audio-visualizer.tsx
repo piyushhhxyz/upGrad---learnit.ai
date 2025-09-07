@@ -8,7 +8,7 @@ interface AudioVisualizerProps {
 
 const AudioSpeakingComponent: React.FC<AudioVisualizerProps> = ({ className = "" }) => {
     const [animationValues, setAnimationValues] = useState([0.8, 1.2, 0.9, 0.7]);
-    const animationRef = useRef<number>();
+    const animationRef = useRef<number | undefined>(undefined);
     const lastTimeRef = useRef<number>(0);
     const targetValuesRef = useRef([0.8, 1.2, 0.9, 0.7]);
     const currentValuesRef = useRef([0.8, 1.2, 0.9, 0.7]);
