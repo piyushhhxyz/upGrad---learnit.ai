@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, XCircle, RotateCcw, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 
 // shadcn/ui components
 const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
@@ -280,7 +280,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quizData, onCorrectAnswer, onWrongA
                                 ) : (
                                     <>
                                         <XCircle className="h-4 w-4" />
-                                        <span>Incorrect. The correct answer is "{correctOption?.text}"</span>
+                                        <span>Incorrect. The correct answer is &quot;{correctOption?.text}&quot;</span>
                                     </>
                                 )}
                             </div>

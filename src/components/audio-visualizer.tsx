@@ -18,7 +18,6 @@ const AudioSpeakingComponent: React.FC<AudioVisualizerProps> = ({ className = ""
     const generateTargets = () => {
         return [0, 1, 2, 3].map((i) => {
             // Create speech-like patterns with different frequencies per blob
-            const baseFreq = 0.5 + i * 0.3;
             const intensity = Math.random() > 0.5 ?
                 0.4 + Math.random() * 1.1 : // High intensity spikes
                 0.7 + Math.random() * 0.5;  // Normal variations
@@ -31,9 +30,8 @@ const AudioSpeakingComponent: React.FC<AudioVisualizerProps> = ({ className = ""
 
     useEffect(() => {
         const animate = (timestamp: number) => {
-            if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-            const deltaTime = timestamp - lastTimeRef.current;
-            lastTimeRef.current = timestamp;
+        if (!lastTimeRef.current) lastTimeRef.current = timestamp;
+        lastTimeRef.current = timestamp;
 
             // Generate new targets more frequently for faster animation
             if (Math.random() < 0.04) { // 4% chance per frame (faster)

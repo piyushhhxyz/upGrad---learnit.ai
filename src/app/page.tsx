@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/navbar";
 import { AudioVisualizer } from "@/components/audio-visualizer";
 import { Snackbar } from "@/components/snackbar";
-import { Progress } from "@/components/ui/progress";
 import { Heart, Bookmark, Share2, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { callOpenAI } from "@/lib/api";
@@ -56,21 +55,15 @@ export default function Home() {
   const [showAudioIcon, setShowAudioIcon] = useState(false);
   const [currentCardId, setCurrentCardId] = useState<number | null>(null);
   const [cardProgress, setCardProgress] = useState<Record<number, number>>({});
-  const [visibleCardId, setVisibleCardId] = useState<number | null>(null);
   const currentVisibleCardRef = useRef<number | null>(null);
   const [userManuallyPaused, setUserManuallyPaused] = useState(false);
   const [hasFirstClick, setHasFirstClick] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const [conversationHistory, setConversationHistory] = useState<any[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<Array<{ cardId: number; audioId?: string; audioContent?: string; timestamp: number }>>([]);
   const [swipeStart, setSwipeStart] = useState<{ x: number; y: number; cardId: number } | null>(null);
   const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
-  const [isSwipeDetected, setIsSwipeDetected] = useState(false);
-  const [isApiLoading, setIsApiLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [loadingCardId, setLoadingCardId] = useState<number | null>(null);
   const [audioManager, setAudioManager] = useState<AudioManager | null>(null);
@@ -88,9 +81,7 @@ export default function Home() {
 
   // Global progress bar state
   const [progressBarProgress, setProgressBarProgress] = useState(0);
-  const [isProgressAnimating, setIsProgressAnimating] = useState(false);
   const globalProgressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizAnswered, setQuizAnswered] = useState(false);
 
   // Global progress bar animation functions
@@ -176,16 +167,15 @@ export default function Home() {
 
     // Subsequent clicks - toggle mute/unmute
     if (audioState.isPlaying && gainNode) {
-      const newMutedState = !audioState.isMuted;
-      console.log('Global click - current muted:', audioState.isMuted, 'new muted:', newMutedState);
-      gainNode.gain.value = newMutedState ? 0 : 1;
-      setAudioState(prev => ({
-        ...prev,
-        isMuted: newMutedState,
-        // Keep isPlaying and currentAudioId intact when muting/unmuting
-        isPlaying: true,
-        currentAudioId: prev.currentAudioId
-      }));
+          const newMutedState = !audioState.isMuted;
+          console.log('Global click - current muted:', audioState.isMuted, 'new muted:', newMutedState);
+          gainNode.gain.value = newMutedState ? 0 : 1;
+          setAudioState(prev => ({
+            ...prev,
+            isMuted: newMutedState,
+            isPlaying: true,
+            currentAudioId: prev.currentAudioId
+          }));
 
       // Show mute/unmute icon with fade effect
       setShowAudioIcon(true);
@@ -232,7 +222,7 @@ export default function Home() {
           // Use Web Audio API to play raw PCM16 data directly
           let ctx = audioContext;
           if (!ctx) {
-            ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
             setAudioContext(ctx);
           }
           const sampleRate = 24000; // OpenAI audio sample rate
@@ -394,13 +384,27 @@ export default function Home() {
         // No annoying feedback
       } else {
         console.log('API call failed:', response.error);
-        setApiError(response.error || "Failed to generate audio");
+        let errorMessage = response.error || "Failed to generate audio";
+        
+        // Show specific message for API key errors
+        if (errorMessage.toLowerCase().includes('api key')) {
+          errorMessage = "OpenAI API key required";
+        }
+        
+        setApiError(errorMessage);
         // Clear loading state on failure too
         setLoadingCardId(null);
       }
     } catch (error) {
       console.error("API call failed:", error);
-      setApiError("Network error occurred");
+      let errorMessage = "Network error occurred";
+      
+      // Check if it's an API key related error
+      if (error instanceof Error && error.message.toLowerCase().includes('api key')) {
+        errorMessage = "OpenAI API key required";
+      }
+      
+      setApiError(errorMessage);
     } finally {
       setLoadingCardId(null);
     }
@@ -434,13 +438,11 @@ export default function Home() {
     const deltaX = touch.clientX - swipeStart.x;
     const deltaY = touch.clientY - swipeStart.y;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const watchTime = watchStartTime ? Math.floor((Date.now() - watchStartTime) / 1000) : 0;
 
     console.log('Swipe distance:', distance, 'Direction:', Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical');
 
     // Check if it's a significant swipe (more than 20px - reduced threshold)
     if (distance > 20) {
-      const direction = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
       console.log('Significant swipe detected! Calling API for card:', cardId);
 
       // Call API with card ID and auto-play
@@ -479,7 +481,6 @@ export default function Home() {
     const deltaX = e.clientX - swipeStart.x;
     const deltaY = e.clientY - swipeStart.y;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const watchTime = watchStartTime ? Math.floor((Date.now() - watchStartTime) / 1000) : 0;
 
     console.log('Mouse swipe distance:', distance);
 
@@ -767,7 +768,7 @@ export default function Home() {
     return () => {
       observer.disconnect();
     };
-  }, [currentCardId, userManuallyPaused, hasFirstClick, conversationHistory]);
+    }, [currentCardId, userManuallyPaused, hasFirstClick, conversationHistory, handleCardSwipe, playCardAudio, currentAudio]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -882,11 +883,19 @@ export default function Home() {
       {/* API Error Indicator */}
       {apiError && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-in fade-in-0 zoom-in-95 duration-300">
-          <div className="p-4 rounded-2xl bg-red-500/80 backdrop-blur-md border border-white/20">
-            <div className="text-white text-lg font-semibold">Error: {apiError}</div>
+          <div className="p-6 rounded-2xl bg-red-500/90 backdrop-blur-md border border-white/20 max-w-sm mx-4">
+            <div className="text-white text-lg font-semibold mb-2">
+              {apiError === "OpenAI API key required" ? "⚠️ API Key Required" : "❌ Error"}
+            </div>
+            <div className="text-white/90 text-sm mb-4">
+              {apiError === "OpenAI API key required" 
+                ? "Please provide your OpenAI API key to generate audio content."
+                : apiError
+              }
+            </div>
             <button
               onClick={() => setApiError(null)}
-              className="mt-2 px-4 py-2 bg-white/20 rounded-lg text-white text-sm hover:bg-white/30 transition-colors"
+              className="w-full px-4 py-2 bg-white/20 rounded-lg text-white text-sm hover:bg-white/30 transition-colors font-medium"
             >
               Dismiss
             </button>
@@ -896,7 +905,7 @@ export default function Home() {
 
       <div className="pt-16 h-screen overflow-hidden flex items-center justify-center px-0 sm:px-4 md:px-6 lg:px-8">
         <div className="h-[90vh] w-full sm:w-[65%] lg:w-[30vw] overflow-y-auto snap-y snap-mandatory scroll-smooth space-y-4 sm:space-y-6 lg:space-y-8 p-2 sm:p-4 lg:p-6">
-          {shortsData.map((short, index) => (
+          {shortsData.map((short) => (
             <Card
               key={short.id}
               ref={(el) => {

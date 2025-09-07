@@ -22,8 +22,21 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Check if API key is available
+        if (!process.env.OPENAI_API_KEY) {
+            console.log('OpenAI API key not found');
+            return NextResponse.json(
+                { success: false, error: "OpenAI API key required" },
+                { status: 400 }
+            );
+        }
+
         // Build messages array based on content ID - exactly as you specified
-        const messages: any[] = [
+        const messages: Array<{
+            role: string;
+            content: Array<{ type: string; text: string }> | [];
+            audio?: { id: string };
+        }> = [
             {
                 "role": "system",
                 "content": [
@@ -37,7 +50,7 @@ export async function POST(request: NextRequest) {
 
         // Add conversation history if available
         if (conversationHistory.length > 0) {
-            conversationHistory.forEach((entry: any, index: number) => {
+            conversationHistory.forEach((entry: { cardId: number; audioId?: string }) => {
                 // Add user message
                 messages.push({
                     "role": "user",
@@ -112,11 +125,11 @@ export async function POST(request: NextRequest) {
             console.log('Audio data from OpenAI:', audioData);
 
             // The audio content might be in different fields
-            if ((audioData as any).content) {
-                audioBase64 = (audioData as any).content;
+            if ('content' in audioData && typeof audioData.content === 'string') {
+                audioBase64 = audioData.content;
                 console.log('Found audio content in audio object');
-            } else if ((audioData as any).data) {
-                audioBase64 = (audioData as any).data;
+            } else if ('data' in audioData && typeof audioData.data === 'string') {
+                audioBase64 = audioData.data;
                 console.log('Found audio data in audio object');
             }
         }

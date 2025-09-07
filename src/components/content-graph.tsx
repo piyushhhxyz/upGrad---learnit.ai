@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     ReactFlow,
     addEdge,
@@ -21,7 +21,7 @@ import contentData from '../../demo-data/content.json';
 const MIN_DISTANCE = 150;
 
 // Custom node component
-const CustomNode = ({ data }: { data: any }) => {
+const CustomNode = ({ data }: { data: { title: string; summary: string; type: string } }) => {
     const [showTooltip, setShowTooltip] = React.useState(false);
 
     return (
@@ -167,11 +167,11 @@ const Flow = () => {
     }, [initialNodes, initialEdges, setNodes, setEdges]);
 
     const onConnect = useCallback(
-        (params: any) => setEdges((eds) => addEdge(params, eds)),
+        (params: Parameters<typeof addEdge>[0]) => setEdges((eds) => addEdge(params, eds)),
         [setEdges],
     );
 
-    const getClosestEdge = useCallback((node: any) => {
+    const getClosestEdge = useCallback((node: Node) => {
         const { nodeLookup } = store.getState();
         const internalNode = getInternalNode(node.id);
 
@@ -218,7 +218,7 @@ const Flow = () => {
     }, [store, getInternalNode]);
 
     const onNodeDrag = useCallback(
-        (_, node: any) => {
+        (_: React.MouseEvent, node: Node) => {
             const closeEdge = getClosestEdge(node);
 
             setEdges((es) => {
@@ -238,11 +238,11 @@ const Flow = () => {
                 return nextEdges;
             });
         },
-        [getClosestEdge, setEdges],
+        [getClosestEdge],
     );
 
     const onNodeDragStop = useCallback(
-        (_, node: any) => {
+        (_: React.MouseEvent, node: Node) => {
             const closeEdge = getClosestEdge(node);
 
             setEdges((es) => {

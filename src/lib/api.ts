@@ -6,7 +6,7 @@ export interface ApiResponse {
     error?: string;
 }
 
-export const callOpenAI = async (contentId: number, conversationHistory: any[] = []): Promise<ApiResponse> => {
+export const callOpenAI = async (contentId: number, conversationHistory: Array<{ cardId: number; audioId?: string; audioContent?: string; timestamp: number }> = []): Promise<ApiResponse> => {
     console.log('callOpenAI called with contentId:', contentId, 'conversationHistory:', conversationHistory);
 
     try {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, User, Settings, LogOut, Bell, Sun, Moon, Sparkles, Upload } from "lucide-react";
+import { Menu, User, Settings, LogOut, Bell, Sparkles, Upload } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Navbar() {
@@ -41,10 +42,10 @@ export function Navbar() {
                                     </div>
                                     <nav className="flex-1 p-4 space-y-2">
                                         <Button variant="ghost" className="w-full justify-start" asChild>
-                                            <a href="/">
+                                            <Link href="/">
                                                 <User size={24} className="mr-2" />
                                                 Shorts Feed
-                                            </a>
+                                            </Link>
                                         </Button>
                                         <Button variant="ghost" className="w-full justify-start" asChild>
                                             <a href="/upload">
@@ -71,12 +72,12 @@ export function Navbar() {
                             </SheetContent>
                         </Sheet>
 
-                        <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                        <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                             <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-b from-yellow-300 via-pink-300 to-blue-300 rounded-lg flex items-center justify-center">
                                 <span className="text-white font-bold text-sm sm:text-base">UA</span>
                             </div>
                             <span className="font-bold text-xl sm:text-2xl text-gray-900 dark:text-white hidden sm:block">Upgrad AI</span>
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Center - Empty space */}
