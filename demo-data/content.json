@@ -1,0 +1,77 @@
+[
+    {
+        "id": 0,
+        "title": "Introduction to Module: Overview of ML and AI",
+        "summary": "Kick-off lecture giving a broad overview of AI, ML, DL, and Data Science through real-world use cases and history.",
+        "objectives": [
+            "Understand the scope of the module",
+            "See how AI connects across everyday life, core terms, history, and GenAI",
+            "Get motivated for upcoming hands-on learning"
+        ],
+        "position": {
+            "x": -20,
+            "y": 250
+        },
+        "type": "root"
+    },
+    {
+        "id": 1,
+        "title": "What all is AI? – Foundation",
+        "summary": "Spot AI in daily apps; hands-on phone demo to see CV/ML/NLP in action.",
+        "objectives": [
+            "Open minds to how pervasive AI already is",
+            "Recognize CV, NLP, and personalization examples",
+            "Connect real apps (Photos, Maps, Spotify, ChatGPT) to AI concepts"
+        ],
+        "position": {
+            "x": 400,
+            "y": 100
+        },
+        "type": "child"
+    },
+    {
+        "id": 2,
+        "title": "AI vs ML vs DL vs DS",
+        "summary": "Untangle terms and overlaps with crisp examples and a simple venn mental model.",
+        "objectives": [
+            "Define AI, ML, DL, DS clearly",
+            "Understand overlaps (symbolic vs learning)",
+            "Map tasks to the right bucket with examples"
+        ],
+        "position": {
+            "x": 400,
+            "y": 500
+        },
+        "type": "child"
+    },
+    {
+        "id": 3,
+        "title": "History of AI & Major Milestones",
+        "summary": "From Dartmouth and backprop to AlphaGo and Transformers; why each mattered.",
+        "objectives": [
+            "Grasp key milestones and their impact",
+            "Internalize backprop as the learning feedback loop",
+            "Understand attention/transformers at a high level"
+        ],
+        "position": {
+            "x": 800,
+            "y": 100
+        },
+        "type": "child"
+    },
+    {
+        "id": 4,
+        "title": "GenAI, Use-cases, and Future Landscape",
+        "summary": "Modern LLM stack (tokens, embeddings, transformers) and where jobs emerge.",
+        "objectives": [
+            "Explain tokens, embeddings, transformers simply",
+            "Link GenAI capabilities to real use-cases/tools",
+            "Identify roles: research, applied AI, GenAI builders"
+        ],
+        "position": {
+            "x": 800,
+            "y": 500
+        },
+        "type": "child"
+    }
+]
